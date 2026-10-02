@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Our Home Search</title>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#ffffff;
+  --text:#18202a;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --accent:#111827;
+  --good:#15965a;
+  --warn:#d69b19;
+  --mid:#dd6b20;
+  --bad:#d14343;
+  --soft:#eef1f5;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+header{
+  background:linear-gradient(135deg,#111827,#263446);
+  color:#fff;
+  border-radius:24px;
+  padding:30px;
+  margin-bottom:22px;
+  box-shadow:0 18px 40px rgba(17,24,39,.14);
+}
+header h1{margin:0 0 8px;font-size:clamp(28px,5vw,44px)}
+header p{margin:0;color:#d1d5db;line-height:1.5}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:22px
+}
+.stat{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:15px
+}
+.stat small{display:block;color:#cbd5e1;margin-bottom:5px}
+.stat strong{font-size:22px}
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  margin-bottom:16px
+}
+.btn{
+  border:none;
+  border-radius:12px;
+  padding:11px 15px;
+  background:#111827;
+  color:white;
+  font-weight:700;
+}
+.btn.secondary{background:#fff;color:#111827;border:1px solid var(--line)}
+.btn.danger{background:#fff;color:#b42318;border:1px solid #f0c4be}
+.btn.small{padding:8px 11px;font-size:13px}
+.section{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow:0 8px 30px rgba(17,24,39,.04)
+}
+.section h2{margin:0 0 6px}
+.section .sub{margin:0 0 18px;color:var(--muted)}
+.importance-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px
+}
+.importance-item{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  background:#fafafa
+}
+.importance-item label{font-weight:700;display:block;margin-bottom:8px}
+.range-row{display:flex;gap:10px;align-items:center}
+.range-row input{width:100%}
+.range-value{min-width:26px;text-align:center;font-weight:800}
+.apartment-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:16px
+}
+.card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:18px;
+  position:relative;
+  box-shadow:0 7px 24px rgba(17,24,39,.05)
+}
+.card.favorite{outline:2px solid #f5b940}
+.card h3{margin:0 0 4px;font-size:22px}
+.card .address{color:var(--muted);font-size:14px;margin-bottom:14px}
+.score-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.score-badge{
+  font-weight:900;
+  font-size:26px;
+  padding:8px 12px;
+  border-radius:14px;
+  color:#fff;
+}
+.score-good{background:var(--good)}
+.score-warn{background:var(--warn)}
+.score-mid{background:var(--mid)}
+.score-bad{background:var(--bad)}
+.quick{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:14px 0
+}
+.quick div{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  padding:10px;
+  border-radius:12px;
+  font-size:14px
+}
+.tag{
+  display:inline-block;
+  background:#eef2f7;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:12px;
+  margin:3px 4px 3px 0
+}
+.notes{
+  margin-top:12px;
+  font-size:14px;
+  line-height:1.5;
+  color:#374151
+}
+.card-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.favorite-star{
+  position:absolute;right:16px;top:14px;font-size:24px;background:none;border:none;padding:2px
+}
+.empty{
+  text-align:center;
+  padding:44px 20px;
+  color:var(--muted)
+}
+.modal-wrap{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.48);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  z-index:1000
+}
+.modal-wrap.show{display:flex}
+.modal{
+  width:min(760px,100%);
+  max-height:92vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 24px 70px rgba(0,0,0,.25)
+}
+.modal h2{margin-top:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-weight:700;font-size:14px}
+.field input,.field select,.field textarea{
+  width:100%;
+  border:1px solid #d6d9df;
+  border-radius:11px;
+  padding:10px 11px;
+  background:#fff
+}
+.field textarea{min-height:86px;resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.criteria-table{width:100%;border-collapse:collapse;margin-top:10px}
+.criteria-table th,.criteria-table td{border-bottom:1px solid var(--line);padding:10px 7px;text-align:left;font-size:14px}
+.breakdown{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px dashed #d9dde3
+}
+.breakdown-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:6px 0;
+  font-size:13px
+}
+details summary{cursor:pointer;font-weight:800}
+.top-controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center
+}
+select.sort-select{
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:10px 12px;
+  background:#fff
+}
+.custom-value{margin-top:8px}
+.help{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:12px 14px;
+  color:#4b5563;
+  font-size:13px;
+  line-height:1.55
+}
+@media(max-width:700px){
+  .container{padding:14px}
+  header{padding:22px;border-radius:18px}
+  .stats{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .apartment-grid{grid-template-columns:1fr}
+}
+</style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Home Search">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🏠 Our Home Search</h1>
+    <p>Compare homes based on what actually matters to us — not just the price.</p>
+    <div class="stats">
+      <div class="stat"><small>Current Options</small><strong id="statCount">0</strong></div>
+      <div class="stat"><small>Best Score</small><strong id="statBest">-</strong></div>
+      <div class="stat"><small>Average Monthly Cost</small><strong id="statAvg">$0</strong></div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn" onclick="openApartmentModal()">＋ Add Apartment</button>
+    <button class="btn secondary" onclick="openCriteriaModal()">＋ Add Criterion</button>
+    <button class="btn secondary" onclick="backupToPhone()">📱 Backup to iPhone</button>
+    <label class="btn secondary" for="importFile">↩️ Restore Backup</label>
+    <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+    <button class="btn danger" onclick="resetAll()">Reset All</button>
+  </div>
+
+  <section class="section" style="padding:15px 18px">
+    <div style="display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap">
+      <div>
+        <b>💾 Your apartments are saved automatically on this phone.</b>
+        <div id="backupStatus" style="color:var(--muted);font-size:13px;margin-top:4px">No manual backup yet.</div>
+      </div>
+      <div style="color:var(--muted);font-size:12px;max-width:390px">For extra safety, tap <b>Backup to iPhone</b> occasionally and save the file to Files or iCloud Drive.</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Priority Settings</h2>
+    <p class="sub">0 means not important and 5 means extremely important. Scores update instantly when priorities change.</p>
+    <div id="importanceGrid" class="importance-grid"></div>
+  </section>
+
+  <section class="section">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+      <div>
+        <h2>Compare Apartments</h2>
+        <p class="sub">Scores are normalized to 100. You can separately save personal impressions using Favorites and notes.</p>
+      </div>
+      <div class="top-controls">
+        <select id="sortSelect" class="sort-select" onchange="renderApartments()">
+          <option value="score">Highest Score</option>
+          <option value="price">Lowest Price</option>
+          <option value="commute">Shortest Commute</option>
+          <option value="year">Newest Building</option>
+          <option value="favorite">Favorites First</option>
+        </select>
+      </div>
+    </div>
+    <div id="apartmentGrid" class="apartment-grid"></div>
+  </section>
+
+  <section class="section">
+    <h2>Default Scoring Rules</h2>
+    <div class="help">
+      <b>Price:</b> $1,800 or less = best; $1,801–1,900 = very good; $1,901–2,000 = slight penalty; $2,001–2,100 = larger penalty; over $2,100 = low score.<br>
+      <b>Commute:</b> 10 min or less = best; 11–15 min = very good; 16–20 min = average; 21–30 min = penalty; over 30 min = low score.<br>
+      <b>Building Age:</b> 2020 or newer = best; 2015–2019 = good; 2010–2014 = average; 2000–2009 = low; before 2000 = lower.<br>
+      <b>Den:</b> Good-sized space &gt; small space &gt; none. <b>Laundry:</b> In-suite &gt; shared &gt; none. <b>Parking:</b> Included indoor &gt; paid indoor &gt; none.
+    </div>
+  </section>
+</div>
+
+<div id="apartmentModal" class="modal-wrap">
+  <div class="modal">
+    <h2 id="apartmentModalTitle">Add Apartment</h2>
+    <div class="form-grid">
+      <input type="hidden" id="aptId">
+      <div class="field"><label>Apartment Name</label><input id="name"></div>
+      <div class="field"><label>Location / Address</label><input id="address"></div>
+      <div class="field"><label>Total Monthly Cost (all-in)</label><input id="price" type="number" min="0" step="1" placeholder="1900"></div>
+      <div class="field"><label>Commute to Work (minutes)</label><input id="commute" type="number" min="0" step="1" placeholder="12"></div>
+      <div class="field"><label>Year Built</label><input id="year" type="number" min="1900" max="2100" placeholder="2022"></div>
+      <div class="field"><label>Den / Extra Room</label>
+        <select id="den">
+          <option value="none">None</option>
+          <option value="small">Small Space</option>
+          <option value="good">Good-sized Space</option>
+        </select>
+      </div>
+      <div class="field"><label>Washer / Dryer</label>
+        <select id="laundry">
+          <option value="none">None</option>
+          <option value="shared">Shared</option>
+          <option value="insuite">In-suite Washer/Dryer</option>
+        </select>
+      </div>
+      <div class="field"><label>Indoor Parking</label>
+        <select id="parking">
+          <option value="none">None</option>
+          <option value="paid">Paid Indoor Parking</option>
+          <option value="included">Included</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label>Additional Criteria</label>
+        <div id="customFields"></div>
+      </div>
+
+      <div class="field"><label>👍 Pros</label><textarea id="pros"></textarea></div>
+      <div class="field"><label>👎 Cons</label><textarea id="cons"></textarea></div>
+      <div class="field full"><label>📝 Impressions / Notes</label><textarea id="notes"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeApartmentModal()">Cancel</button>
+      <button class="btn" onclick="saveApartment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="criteriaModal" class="modal-wrap">
+  <div class="modal">
+    <h2>Add Evaluation Criterion</h2>
+    <div class="form-grid">
+      <div class="field full"><label>Criterion Name</label><input id="critName" placeholder="e.g. Balcony, Natural Light, Walk-in Closet"></div>
+      <div class="field"><label>Rating Type</label>
+        <select id="critType">
+          <option value="yesno">Yes / No</option>
+          <option value="rating">1–5 Rating</option>
+          <option value="number">Number</option>
+        </select>
+      </div>
+      <div class="field"><label>Priority (0–5)</label><input id="critWeight" type="number" min="0" max="5" value="3"></div>
+      <div class="field full"><label>For numeric criteria, which direction is better?</label>
+        <select id="critDirection">
+          <option value="higher">Higher is better</option>
+          <option value="lower">Lower is better</option>
+        </select>
+      </div>
+      <div class="field full">
+        <div class="help">Numeric criteria are scored relative to the current options. For example, a larger living area is better, while a shorter distance to a grocery store is better.</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" onclick="closeCriteriaModal()">Cancel</button>
+      <button class="btn" onclick="addCriterion()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "girlfriend_apartment_evaluator_v1";
+
+const defaultCriteria = [
+  {id:"price", name:"Monthly Total", weight:5, builtIn:true},
+  {id:"den", name:"Den / Craft Space", weight:4, builtIn:true},
+  {id:"laundry", name:"In-suite Washer/Dryer", weight:5, builtIn:true},
+  {id:"year", name:"Building Age", weight:3, builtIn:true},
+  {id:"commute", name:"10–15 Min to Work", weight:5, builtIn:true},
+  {id:"parking", name:"Indoor Parking", weight:3, builtIn:true},
+];
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {criteria:JSON.parse(JSON.stringify(defaultCriteria)), apartments:[]};
+    const parsed = JSON.parse(raw);
+    if(!parsed.criteria || !parsed.apartments) throw new Error("invalid");
+    return parsed;
+  }catch(e){
+    return {criteria:JSON.parse(JSON.stringify(defaultCriteria)), apartments:[]};
+  }
+}
+function persist(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function money(v){ return "$" + Number(v||0).toLocaleString("en-CA"); }
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+function renderImportance(){
+  const el = document.getElementById("importanceGrid");
+  el.innerHTML = state.criteria.map(c=>`
+    <div class="importance-item">
+      <label>${escapeHtml(c.name)} ${c.builtIn ? "" : `<button class="btn small danger" style="float:right" onclick="deleteCriterion('${c.id}')">Delete</button>`}</label>
+      <div class="range-row">
+        <input type="range" min="0" max="5" step="1" value="${c.weight}" oninput="updateWeight('${c.id}', this.value)">
+        <span id="weight-${c.id}" class="range-value">${c.weight}</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+function updateWeight(id, value){
+  const c = state.criteria.find(x=>x.id===id);
+  if(!c) return;
+  c.weight = Number(value);
+  document.getElementById("weight-"+id).textContent = value;
+  persist();
+  renderApartments();
+}
+
+function deleteCriterion(id){
+  if(!confirm("Delete this criterion? Its saved values will no longer be used.")) return;
+  state.criteria = state.criteria.filter(c=>c.id!==id);
+  state.apartments.forEach(a=>{ if(a.custom) delete a.custom[id]; });
+  persist();
+  renderImportance();
+  renderApartments();
+}
+
+function scoreBase(apt, id){
+  if(id==="price"){
+    const p=Number(apt.price||0);
+    if(!p) return 0;
+    if(p<=1800) return 1;
+    if(p<=1900) return .9;
+    if(p<=2000) return .7;
+    if(p<=2100) return .45;
+    return .2;
+  }
+  if(id==="commute"){
+    const m=Number(apt.commute||0);
+    if(!m && m!==0) return 0;
+    if(m<=10) return 1;
+    if(m<=15) return .9;
+    if(m<=20) return .65;
+    if(m<=30) return .4;
+    return .15;
+  }
+  if(id==="year"){
+    const y=Number(apt.year||0);
+    if(!y) return 0;
+    if(y>=2020) return 1;
+    if(y>=2015) return .85;
+    if(y>=2010) return .65;
+    if(y>=2000) return .4;
+    return .2;
+  }
+  if(id==="den") return ({good:1,small:.6,none:0})[apt.den] ?? 0;
+  if(id==="laundry") return ({insuite:1,shared:.45,none:0})[apt.laundry] ?? 0;
+  if(id==="parking") return ({included:1,paid:.75,none:0})[apt.parking] ?? 0;
+  return 0;
+}
+
+function customScore(apt, criterion){
+  const v = apt.custom?.[criterion.id];
+  if(criterion.type==="yesno") return v==="yes" ? 1 : 0;
+  if(criterion.type==="rating") return Math.max(0,Math.min(1,Number(v||0)/5));
+  if(criterion.type==="number"){
+    const nums = state.apartments
+      .map(a=>Number(a.custom?.[criterion.id]))
+      .filter(x=>Number.isFinite(x));
+    if(!nums.length || v==="" || v===undefined || v===null) return 0;
+    const n=Number(v);
+    const min=Math.min(...nums), max=Math.max(...nums);
+    if(min===max) return 1;
+    const normalized=(n-min)/(max-min);
+    return criterion.direction==="lower" ? 1-normalized : normalized;
+  }
+  return 0;
+}
+
+function calcScore(apt){
+  let earned=0, possible=0;
+  const breakdown=[];
+  for(const c of state.criteria){
+    const w=Number(c.weight||0);
+    if(w<=0) continue;
+    const s=c.builtIn ? scoreBase(apt,c.id) : customScore(apt,c);
+    earned += s*w;
+    possible += w;
+    breakdown.push({name:c.name, score:s, weight:w});
+  }
+  return {
+    total: possible ? Math.round((earned/possible)*100) : 0,
+    breakdown
+  };
+}
+
+function scoreClass(s){
+  if(s>=85) return "score-good";
+  if(s>=70) return "score-warn";
+  if(s>=55) return "score-mid";
+  return "score-bad";
+}
+function scoreLabel(s){
+  if(s>=85) return "Excellent Match";
+  if(s>=70) return "Good Match";
+  if(s>=55) return "Average Match";
+  return "Weak Match";
+}
+
+function textForDen(v){return ({good:"Good-sized Den",small:"Small Extra Space",none:"No Den"})[v]||"-"}
+function textForLaundry(v){return ({insuite:"In-suite Laundry",shared:"Shared Laundry",none:"No Laundry"})[v]||"-"}
+function textForParking(v){return ({included:"Indoor Parking Included",paid:"Paid Indoor Parking",none:"No Indoor Parking"})[v]||"-"}
+
+function renderApartments(){
+  const grid=document.getElementById("apartmentGrid");
+  let list=[...state.apartments];
+  const sort=document.getElementById("sortSelect").value;
+  list.sort((a,b)=>{
+    if(sort==="price") return Number(a.price||999999)-Number(b.price||999999);
+    if(sort==="commute") return Number(a.commute||999999)-Number(b.commute||999999);
+    if(sort==="year") return Number(b.year||0)-Number(a.year||0);
+    if(sort==="favorite") return Number(b.favorite)-Number(a.favorite) || calcScore(b).total-calcScore(a).total;
+    return calcScore(b).total-calcScore(a).total;
+  });
+
+  if(!list.length){
+    grid.innerHTML=`<div class="empty">No apartments have been added yet.<br><br><button class="btn" onclick="openApartmentModal()">Add Your First Apartment</button></div>`;
+  } else {
+    grid.innerHTML=list.map((a,idx)=>{
+      const s=calcScore(a);
+      const customTags = state.criteria.filter(c=>!c.builtIn).map(c=>{
+        const v=a.custom?.[c.id];
+        if(v===undefined || v==="") return "";
+        let label=v;
+        if(c.type==="yesno") label=v==="yes"?"Yes":"No";
+        if(c.type==="rating") label=`${v}/5`;
+        return `<span class="tag">${escapeHtml(c.name)}: ${escapeHtml(label)}</span>`;
+      }).join("");
+      const rank = sort==="score" ? `#${idx+1}` : "";
+      return `
+      <article class="card ${a.favorite?"favorite":""}">
+        <button class="favorite-star" onclick="toggleFavorite('${a.id}')" title="Favourite">${a.favorite?"⭐":"☆"}</button>
+        <h3>${escapeHtml(a.name||"Unnamed Apartment")} <span style="font-size:13px;color:#9ca3af">${rank}</span></h3>
+        <div class="address">${escapeHtml(a.address||"No address")}</div>
+        <div class="score-row">
+          <div>
+            <div class="score-badge ${scoreClass(s.total)}">${s.total} / 100</div>
+            <div style="margin-top:5px;color:#6b7280;font-size:13px">${scoreLabel(s.total)}</div>
+          </div>
+          <div style="text-align:right">
+            <b style="font-size:20px">${money(a.price)}</b><br>
+            <span style="color:#6b7280;font-size:13px">Monthly Total</span>
+          </div>
+        </div>
+        <div class="quick">
+          <div>🚗 ${a.commute ?? "-"} min</div>
+          <div>🏗 ${a.year || "-"}</div>
+          <div>🧶 ${textForDen(a.den)}</div>
+          <div>🧺 ${textForLaundry(a.laundry)}</div>
+          <div>🚘 ${textForParking(a.parking)}</div>
+          <div>❤️ ${a.favorite?"Favourite":"Regular Option"}</div>
+        </div>
+        <div>${customTags}</div>
+        ${a.pros?`<div class="notes"><b>👍 Pros</b><br>${escapeHtml(a.pros)}</div>`:""}
+        ${a.cons?`<div class="notes"><b>👎 Cons</b><br>${escapeHtml(a.cons)}</div>`:""}
+        ${a.notes?`<div class="notes"><b>📝 Notes</b><br>${escapeHtml(a.notes)}</div>`:""}
+        <details class="breakdown">
+          <summary>View Score Breakdown</summary>
+          ${s.breakdown.map(x=>`
+            <div class="breakdown-row">
+              <span>${escapeHtml(x.name)} · Priority ${x.weight}</span>
+              <b>${Math.round(x.score*100)}%</b>
+            </div>`).join("")}
+        </details>
+        <div class="card-actions">
+          <button class="btn small secondary" onclick="openApartmentModal('${a.id}')">Edit</button>
+          <button class="btn small secondary" onclick="duplicateApartment('${a.id}')">Duplicate</button>
+          <button class="btn small danger" onclick="deleteApartment('${a.id}')">Delete</button>
+        </div>
+      </article>`;
+    }).join("");
+  }
+  renderStats();
+}
+
+function renderStats(){
+  const n=state.apartments.length;
+  document.getElementById("statCount").textContent=n+"";
+  if(!n){
+    document.getElementById("statBest").textContent="-";
+    document.getElementById("statAvg").textContent="$0";
+    return;
+  }
+  const scores=state.apartments.map(a=>calcScore(a).total);
+  const avg=state.apartments.reduce((s,a)=>s+Number(a.price||0),0)/n;
+  document.getElementById("statBest").textContent=Math.max(...scores)+"";
+  document.getElementById("statAvg").textContent=money(Math.round(avg));
+}
+
+function renderCustomFields(existing={}){
+  const box=document.getElementById("customFields");
+  const custom=state.criteria.filter(c=>!c.builtIn);
+  if(!custom.length){
+    box.innerHTML=`<div class="help">No additional criteria yet.</div>`;
+    return;
+  }
+  box.innerHTML=custom.map(c=>{
+    const val=existing?.[c.id] ?? "";
+    if(c.type==="yesno"){
+      return `<div class="field custom-value"><label>${escapeHtml(c.name)}</label>
+      <select data-custom-id="${c.id}">
+        <option value="">Not Set</option>
+        <option value="yes" ${val==="yes"?"selected":""}>Yes</option>
+        <option value="no" ${val==="no"?"selected":""}>No</option>
+      </select></div>`;
+    }
+    if(c.type==="rating"){
+      return `<div class="field custom-value"><label>${escapeHtml(c.name)}</label>
+      <select data-custom-id="${c.id}">
+        <option value="">Not Set</option>
+        ${[1,2,3,4,5].map(x=>`<option value="${x}" ${String(val)===String(x)?"selected":""}>${x} / 5</option>`).join("")}
+      </select></div>`;
+    }
+    return `<div class="field custom-value"><label>${escapeHtml(c.name)}</label>
+      <input data-custom-id="${c.id}" type="number" step="any" value="${escapeHtml(val)}">
+    </div>`;
+  }).join("");
+}
+
+function openApartmentModal(id=null){
+  const a=id?state.apartments.find(x=>x.id===id):null;
+  document.getElementById("apartmentModalTitle").textContent=a?"Edit Apartment":"Add Apartment";
+  document.getElementById("aptId").value=a?.id||"";
+  document.getElementById("name").value=a?.name||"";
+  document.getElementById("address").value=a?.address||"";
+  document.getElementById("price").value=a?.price??"";
+  document.getElementById("commute").value=a?.commute??"";
+  document.getElementById("year").value=a?.year??"";
+  document.getElementById("den").value=a?.den||"none";
+  document.getElementById("laundry").value=a?.laundry||"none";
+  document.getElementById("parking").value=a?.parking||"none";
+  document.getElementById("pros").value=a?.pros||"";
+  document.getElementById("cons").value=a?.cons||"";
+  document.getElementById("notes").value=a?.notes||"";
+  renderCustomFields(a?.custom||{});
+  document.getElementById("apartmentModal").classList.add("show");
+}
+function closeApartmentModal(){document.getElementById("apartmentModal").classList.remove("show")}
+
+function saveApartment(){
+  const id=document.getElementById("aptId").value;
+  const custom={};
+  document.querySelectorAll("[data-custom-id]").forEach(el=>custom[el.dataset.customId]=el.value);
+  const data={
+    id:id||"apt_"+Date.now(),
+    name:document.getElementById("name").value.trim(),
+    address:document.getElementById("address").value.trim(),
+    price:Number(document.getElementById("price").value||0),
+    commute:Number(document.getElementById("commute").value||0),
+    year:Number(document.getElementById("year").value||0),
+    den:document.getElementById("den").value,
+    laundry:document.getElementById("laundry").value,
+    parking:document.getElementById("parking").value,
+    pros:document.getElementById("pros").value.trim(),
+    cons:document.getElementById("cons").value.trim(),
+    notes:document.getElementById("notes").value.trim(),
+    custom
+  };
+  const old=state.apartments.find(x=>x.id===id);
+  data.favorite=old?.favorite||false;
+  if(id){
+    const i=state.apartments.findIndex(x=>x.id===id);
+    state.apartments[i]=data;
+  }else state.apartments.push(data);
+  persist(); closeApartmentModal(); renderApartments();
+}
+
+function deleteApartment(id){
+  if(!confirm("Delete this apartment?")) return;
+  state.apartments=state.apartments.filter(a=>a.id!==id);
+  persist(); renderApartments();
+}
+function duplicateApartment(id){
+  const src=state.apartments.find(a=>a.id===id);
+  if(!src) return;
+  const copy=JSON.parse(JSON.stringify(src));
+  copy.id="apt_"+Date.now();
+  copy.name=(copy.name||"후보")+" (Copy)";
+  copy.favorite=false;
+  state.apartments.push(copy);
+  persist(); renderApartments();
+}
+function toggleFavorite(id){
+  const a=state.apartments.find(x=>x.id===id);
+  if(!a)return;
+  a.favorite=!a.favorite;
+  persist(); renderApartments();
+}
+
+function openCriteriaModal(){
+  document.getElementById("critName").value="";
+  document.getElementById("critType").value="yesno";
+  document.getElementById("critWeight").value=3;
+  document.getElementById("critDirection").value="higher";
+  document.getElementById("criteriaModal").classList.add("show");
+}
+function closeCriteriaModal(){document.getElementById("criteriaModal").classList.remove("show")}
+function addCriterion(){
+  const name=document.getElementById("critName").value.trim();
+  if(!name){alert("Please enter a criterion name.");return}
+  const type=document.getElementById("critType").value;
+  const weight=Math.max(0,Math.min(5,Number(document.getElementById("critWeight").value||0)));
+  const direction=document.getElementById("critDirection").value;
+  state.criteria.push({
+    id:"custom_"+Date.now(),
+    name,type,weight,direction,builtIn:false
+  });
+  persist();
+  closeCriteriaModal();
+  renderImportance();
+  renderApartments();
+}
+
+function backupFilename(){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,"0");
+  return `home_search_backup_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;
+}
+function markBackupNow(){
+  localStorage.setItem("home_search_last_backup", new Date().toISOString());
+  renderBackupStatus();
+}
+function renderBackupStatus(){
+  const el=document.getElementById("backupStatus");
+  if(!el)return;
+  const raw=localStorage.getItem("home_search_last_backup");
+  if(!raw){ el.textContent="No manual backup yet."; return; }
+  const d=new Date(raw);
+  el.textContent=`Last manual backup: ${d.toLocaleString()}`;
+}
+async function backupToPhone(){
+  const json=JSON.stringify(state,null,2);
+  const file=new File([json], backupFilename(), {type:"application/json"});
+  try{
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({files:[file], title:"Our Home Search Backup", text:"Apartment list backup"});
+      markBackupNow();
+      return;
+    }
+  }catch(e){
+    if(e && e.name==="AbortError") return;
+  }
+  const url=URL.createObjectURL(file);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=file.name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  markBackupNow();
+}
+function exportData(){ return backupToPhone(); }
+function importData(event){
+  const file=event.target.files?.[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const obj=JSON.parse(reader.result);
+      if(!obj.criteria || !obj.apartments) throw new Error();
+      if(!confirm("Replace the current data with the contents of this backup?")) return;
+      state=obj;
+      persist();
+      renderImportance();
+      renderApartments();
+      localStorage.setItem("home_search_last_backup", new Date().toISOString());
+      renderBackupStatus();
+      alert("Backup restored successfully. Your apartments are now saved on this phone.");
+    }catch(e){alert("This is not a valid backup JSON file.");}
+    event.target.value="";
+  };
+  reader.readAsText(file);
+}
+function resetAll(){
+  if(!confirm("Reset all apartments and custom criteria? This cannot be undone.")) return;
+  state={criteria:JSON.parse(JSON.stringify(defaultCriteria)),apartments:[]};
+  persist(); renderImportance(); renderApartments();
+}
+
+document.getElementById("apartmentModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeApartmentModal()});
+document.getElementById("criteriaModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeCriteriaModal()});
+
+renderImportance();
+renderApartments();
+renderBackupStatus();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.error));
+}
+</script>
+</body>
+</html>
